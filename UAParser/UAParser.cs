@@ -1,4 +1,4 @@
-#region Apache License, Version 2.0
+ #region Apache License, Version 2.0
 //
 // Copyright 2014 Atif Aziz
 // Portions Copyright 2012 Søren Enemærke
@@ -26,6 +26,7 @@ namespace UAParser
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Represents the physical device the user agent is using
@@ -326,10 +327,18 @@ namespace UAParser
         /// </summary>
         public ClientInfo Parse(string uaString)
         {
-            var os     = ParseOS(uaString);
-            var device = ParseDevice(uaString);
-            var ua     = ParseUserAgent(uaString);
-            return new ClientInfo(uaString, os, device, ua);
+            return ParseAsync(uaString).Result;
+        }
+
+        /// <summary>
+        /// Parse a user agent string and obtain all client information
+        /// </summary>
+        public async Task<ClientInfo> ParseAsync(string uaString)
+        {
+            var osTask = Task.Run(() => ParseOS(uaString));
+            var deviceTask = Task.Run(() => ParseDevice(uaString));
+            var uaTask = Task.Run(() => ParseUserAgent(uaString));
+            return new ClientInfo(uaString, await osTask, await deviceTask, await uaTask);
         }
 
         /// <summary>

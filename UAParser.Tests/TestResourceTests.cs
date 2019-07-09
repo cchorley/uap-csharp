@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Sdk;
 using YamlDotNet.RepresentationModel;
@@ -12,42 +13,42 @@ namespace UAParser.Tests
     public class TestResourceTests
     {
         [Fact]
-        public void can_run_device_tests()
+        public async Task can_run_device_tests()
         {
-            RunTests("UAParser.Tests.TestResources.test_device.yaml", DeviceYamlTestCase.ReadFromMap);
+            await RunTests("UAParser.Tests.TestResources.test_device.yaml", DeviceYamlTestCase.ReadFromMap);
         }
 
         [Fact]
-        public void can_run_additional_os_tests()
+        public async Task can_run_additional_os_tests()
         {
-            RunTests("UAParser.Tests.TestResources.additional_os_tests.yaml", OSYamlTestCase.ReadFromMap);
+            await RunTests("UAParser.Tests.TestResources.additional_os_tests.yaml", OSYamlTestCase.ReadFromMap);
         }
 
         [Fact]
-        public void can_run_firefox_user_agent_string_tests()
+        public async Task can_run_firefox_user_agent_string_tests()
         {
-            RunTests("UAParser.Tests.TestResources.firefox_user_agent_strings.yaml", UserAgentYamlTestCase.ReadFromMap);
+            await RunTests("UAParser.Tests.TestResources.firefox_user_agent_strings.yaml", UserAgentYamlTestCase.ReadFromMap);
         }
 
         [Fact]
-        public void can_run_pgts_browser_list_tests()
+        public async Task can_run_pgts_browser_list_tests()
         {
-            RunTests("UAParser.Tests.TestResources.pgts_browser_list.yaml", UserAgentYamlTestCase.ReadFromMap);
+            await RunTests("UAParser.Tests.TestResources.pgts_browser_list.yaml", UserAgentYamlTestCase.ReadFromMap);
         }
 
         [Fact]
-        public void can_run_user_agent_parser_tests()
+        public async Task can_run_user_agent_parser_tests()
         {
-            RunTests("UAParser.Tests.TestResources.test_ua.yaml", UserAgentYamlTestCase.ReadFromMap);
+            await RunTests("UAParser.Tests.TestResources.test_ua.yaml", UserAgentYamlTestCase.ReadFromMap);
         }
 
         [Fact]
-        public void can_run_user_agent_parser_os_tests()
+        public async Task can_run_user_agent_parser_os_tests()
         {
-            RunTests("UAParser.Tests.TestResources.test_os.yaml", OSYamlTestCase.ReadFromMap);
+            await RunTests("UAParser.Tests.TestResources.test_os.yaml", OSYamlTestCase.ReadFromMap);
         }
 
-        internal void RunTests<TTestCase>(
+        internal async Task RunTests<TTestCase>(
           string resourceName,
           Func<Dictionary<string, string>, TTestCase> testCaseFunction) where TTestCase : YamlTestCase
         {
@@ -56,10 +57,10 @@ namespace UAParser.Tests
               "test_cases",
               testCaseFunction);
 
-            RunTestCases(testCases);
+            await RunTestCases(testCases);
         }
 
-        private static void RunTestCases<TTestCase>(List<TTestCase> testCases) where TTestCase : YamlTestCase
+        private static async Task RunTestCases<TTestCase>(List<TTestCase> testCases) where TTestCase : YamlTestCase
         {
             Parser parser = Parser.GetDefault();
             Assert.NotEmpty(testCases);
@@ -71,7 +72,7 @@ namespace UAParser.Tests
                 if (tc == null)
                     continue;
 
-                var clientInfo = parser.Parse(tc.UserAgent);
+                var clientInfo = await parser.ParseAsync(tc.UserAgent);
                 try
                 {
                     tc.Verify(clientInfo);
